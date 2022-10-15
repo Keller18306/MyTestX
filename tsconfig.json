@@ -1,0 +1,21 @@
+{
+    "compilerOptions": {
+        "target": "ESNext",
+        "moduleResolution": "Node",
+        "module": "CommonJS",
+        "strict": true,
+        "strictNullChecks": true,
+        "esModuleInterop": true,
+        "forceConsistentCasingInFileNames": true,
+        "outDir": "./build/",
+        "removeComments": true,
+        "lib": [
+            "DOM"
+        ],
+        "allowJs": true
+    },
+    "exclude": [
+        "tiktok/tiktok_js/*.js",
+        "node_modules"
+    ]
+}
