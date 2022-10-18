@@ -60,6 +60,5 @@ export type NumberAnswer = {
 
 export type Resource = {
     fileName: string,
-    size: number,
     content: Buffer
 }

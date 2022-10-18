@@ -1,4 +1,4 @@
-import { ReadBuffer } from "../../utils/buffer";
+import { ReadBuffer, WriteBuffer } from "../../utils/buffer";
 import { NumberAnswer, TaskType } from "../types";
 import { AbstractTask } from "./Abstract";
 
@@ -26,5 +26,18 @@ export class TaskInputNumber extends AbstractTask {
         this.checkNumberOrder = buffer.readBool()
 
         return this;
+    }
+
+    public override save(buffer: WriteBuffer): void {
+        super.save(buffer);
+
+        buffer.writeUInt8(this.numberAnswers.length);
+        for (const num of this.numberAnswers) {
+            buffer.writeBigInt64BE(num.range[0]);
+            buffer.writeBigInt64BE(num.range[1]);
+            buffer.writeDelphiString(num.label);
+        }
+
+        buffer.writeBool(this.checkNumberOrder)
     }
 }

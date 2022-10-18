@@ -101,7 +101,7 @@ export class MTFSettings {
             const mark = buffer.readUInt32LE();
             const percent = buffer.readUInt32LE();
             const name = buffer.readDelphiString();
-            
+
             this.marks[mark] = { percent, name };
         }
         this.mark100True = buffer.readBool();
@@ -110,6 +110,44 @@ export class MTFSettings {
     }
 
     public save(buffer: WriteBuffer) {
+        buffer.writeUInt8(this.taskOrder);
+        buffer.writeUInt8(this.variantOrder);
+        buffer.writeUInt32LE(this.questionFormulization);
+        buffer.writeUInt32LE(this.timeLimit);
+        buffer.writeUInt32LE(this.countTaskLimit); // ЖЕЛАТЕЛЬНО НЕ ИСПОЛЬЗОВАТЬ, ИБО ЛИМИТ ЗАДАЁТСЯ ПО ГРУППЕ
 
+        buffer.writeBool(this.modes.education);
+        buffer.writeBool(this.modes.penalty);
+        buffer.writeBool(this.modes.free);
+        buffer.writeBool(this.modes.mono);
+
+        buffer.writeBool(this.isShowUserResult);
+        buffer.writeBool(this.isCanSaveResult);
+        buffer.writeBool(this.isCanSaveProtectedResult);
+        buffer.writeBool(this.isSendResult);
+        buffer.writeBool(this.isMonitor);
+        buffer.writeBool(this.isShowDetailReport);
+        buffer.writeBool(this.isSendEmail);
+        buffer.writeBool(this.isShowGoodAnswer);
+        buffer.writeUInt32LE(this.minimumLimit);
+        buffer.writeUInt32LE(this.limitRunCount);
+        buffer.writeUInt32LE(this.limitErrorCount);
+        buffer.writeBigUInt64LE(this.dateStarting);
+        buffer.writeBigUInt64LE(this.dateEnding);
+        buffer.writeDelphiString(this.passwordEdit);
+        buffer.writeDelphiString(this.passwordOpen);
+        buffer.writeDelphiString(this.passwordRun);
+        buffer.writeDelphiString(this.passwordProtectionResult);
+
+        buffer.writeUInt32LE(this.markLevel);
+        for (const _mark in this.marks) {
+            const mark = this.marks[_mark]
+
+            buffer.writeUInt32LE(Number(_mark));
+            buffer.writeUInt32LE(mark.percent);
+            buffer.writeDelphiString(mark.name);
+        }
+
+        buffer.writeBool(this.mark100True);
     }
 }

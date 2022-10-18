@@ -1,4 +1,4 @@
-import { ReadBuffer } from "../../utils/buffer";
+import { ReadBuffer, WriteBuffer } from "../../utils/buffer";
 import { TaskType } from "../types";
 import { TaskSingleChoise } from "./SingleChoice";
 
@@ -18,5 +18,14 @@ export class TaskMatching extends TaskSingleChoise {
         }
 
         return this;
+    }
+
+    public override save(buffer: WriteBuffer): void {
+        super.save(buffer);
+
+        buffer.writeUInt32LE(this.matchingAnswers.length);
+        for (const answer of this.matchingAnswers) {
+            buffer.writeDelphiString(answer);
+        }
     }
 }

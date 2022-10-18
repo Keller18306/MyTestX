@@ -1,5 +1,5 @@
-import { ReadBuffer } from "../../utils/buffer";
-import { NumberAnswer, TaskType } from "../types";
+import { ReadBuffer, WriteBuffer } from "../../utils/buffer";
+import { TaskType } from "../types";
 import { AbstractTask } from "./Abstract";
 
 export class TaskLetterPermutation extends AbstractTask {
@@ -13,5 +13,11 @@ export class TaskLetterPermutation extends AbstractTask {
         this.permutationWord = buffer.readDelphiString();
 
         return this;
+    }
+
+    public override save(buffer: WriteBuffer): void {
+        super.save(buffer);
+
+        buffer.writeDelphiString(this.permutationWord);
     }
 }

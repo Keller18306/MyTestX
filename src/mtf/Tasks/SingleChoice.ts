@@ -1,4 +1,4 @@
-import { ReadBuffer } from "../../utils/buffer";
+import { ReadBuffer, WriteBuffer } from "../../utils/buffer";
 import { TaskType } from "../types";
 import { AbstractTask } from "./Abstract";
 
@@ -26,5 +26,19 @@ export class TaskSingleChoise extends AbstractTask {
         }
 
         return this;
+    }
+
+    public override save(buffer: WriteBuffer): void {
+        super.save(buffer);
+
+        buffer.writeUInt32LE(this.answers.length);
+        for (const answer of this.answers) {
+            buffer.writeDelphiString(answer);
+        }
+
+        buffer.writeUInt32LE(this.correctAnswers.length);
+        for (const answer of this.correctAnswers) {
+            buffer.writeUInt32LE(answer);
+        }
     }
 }

@@ -1,11 +1,11 @@
-import { ReadBuffer } from "../../utils/buffer";
-import { NumberAnswer, TaskType } from "../types";
+import { ReadBuffer, WriteBuffer } from "../../utils/buffer";
+import { TaskType } from "../types";
 import { AbstractTask } from "./Abstract";
 
 export class TaskImagePart extends AbstractTask {
     public readonly type: TaskType = TaskType.ImagePart;
 
-    public bounds: [number, number][][] = [];
+    public figures: [number, number][][] = [];
 
     public override load(buffer: ReadBuffer): this {
         super.load(buffer);
@@ -20,9 +20,23 @@ export class TaskImagePart extends AbstractTask {
 
                 bounds.push([x, y])
             }
-            this.bounds.push(bounds)
+            this.figures.push(bounds)
         }
 
         return this;
+    }
+
+    public override save(buffer: WriteBuffer): void {
+        super.save(buffer);
+
+        buffer.writeUInt32LE(this.figures.length);
+        for (const figure of this.figures) {
+            buffer.writeUInt32LE(figure.length); //bounds
+
+            for (const bounds of figure) {
+                buffer.writeUInt32LE(bounds[0]);
+                buffer.writeUInt32LE(bounds[1]);
+            }
+        }
     }
 }

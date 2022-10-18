@@ -1,4 +1,4 @@
-import { ReadBuffer } from "../utils/buffer";
+import { ReadBuffer, WriteBuffer } from "../utils/buffer";
 import { Resource } from "./types";
 
 export class MTFResources extends Map<string, Resource> {
@@ -13,7 +13,6 @@ export class MTFResources extends Map<string, Resource> {
 
             this.set(fileName, {
                 fileName,
-                size,
                 content
             })
         }
@@ -21,7 +20,14 @@ export class MTFResources extends Map<string, Resource> {
         return this;
     }
 
-    public save() {
+    public save(buffer: WriteBuffer) {
+        buffer.writeUInt32LE(this.size);
+        for (const entry of this) {
+            const file = entry[1];
 
+            buffer.writeDelphiString(file.fileName);
+            buffer.writeUInt32LE(file.content.length);
+            buffer.writeBuffer(file.content);
+        }
     }
 }

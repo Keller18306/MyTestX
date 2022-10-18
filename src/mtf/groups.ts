@@ -17,7 +17,13 @@ export class Group {
         return this
     }
 
-    public save() { }
+    public save(buffer: WriteBuffer) {
+        buffer.writeUInt32LE(this.id);
+        buffer.writeDelphiString(this.title);
+        buffer.writeDelphiString(this.description);
+        buffer.writeUInt32LE(this.questionsLimit);
+        buffer.writeBool(this.useQuestionsLimit);
+    }
 }
 
 export class MTFGroups extends Array<Group> {
@@ -26,7 +32,7 @@ export class MTFGroups extends Array<Group> {
     constructor() {
         super()
 
-        this.push(new Group())        
+        this.push(new Group())
     }
 
     public getGroupById(id: number): Group | undefined {
@@ -54,6 +60,14 @@ export class MTFGroups extends Array<Group> {
     }
 
     public save(buffer: WriteBuffer) {
+        buffer.writeUInt32LE(this.length);
+        for (const group of this) {
+            group.save(buffer)
+        }
 
+        buffer.writeBool(this.useGroupsLimit);
+
+        //BYTES 4 + 1 + 4 + 1 + 4 + 1 + 4 + 1 + 4 + 1 возможно не используются
+        buffer.writeZeroBytes(25);
     }
 }

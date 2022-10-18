@@ -1,4 +1,4 @@
-import { ReadBuffer } from "../../utils/buffer";
+import { ReadBuffer, WriteBuffer } from "../../utils/buffer";
 import { TaskType } from "../types";
 
 export abstract class AbstractTask {
@@ -33,13 +33,24 @@ export abstract class AbstractTask {
         this.groupId = buffer.readUInt32LE();
         this.shuffleAnswers = buffer.readBool();
 
-        //BYTES 4 + 1 возможно не используются
-        buffer.skip(5);
-
         return this
     }
 
-    public save() {
+    public save(buffer: WriteBuffer) {
+        buffer.writeUInt32LE(this.formulations.length);
+        for (const formulation of this.formulations) {
+            buffer.writeDelphiString(formulation)
+        }
 
+        buffer.writeDelphiString(this.photo);
+        buffer.writeDelphiString(this.media);
+        buffer.writeUInt32LE(this.difficulty);
+        buffer.writeUInt32LE(this.timeLimit);
+        buffer.writeDelphiString(this.prologue);
+        buffer.writeDelphiString(this.prompt);
+        buffer.writeUInt32LE(this.promptCost);
+        buffer.writeDelphiString(this.explanation);
+        buffer.writeUInt32LE(this.groupId);
+        buffer.writeBool(this.shuffleAnswers);
     }
 }
