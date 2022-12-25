@@ -136,6 +136,24 @@ export class ReadBuffer {
         return value
     }
 
+    readDoubleBE(_offset?: number): number {
+        const offset = _offset === undefined ? this.offset : _offset
+        const value = this.buffer.readDoubleBE(offset)
+
+        if (_offset === undefined) this.offset += 8
+
+        return value
+    }
+
+    readDoubleLE(_offset?: number): number {
+        const offset = _offset === undefined ? this.offset : _offset
+        const value = this.buffer.readDoubleLE(offset)
+
+        if (_offset === undefined) this.offset += 8
+
+        return value
+    }
+
     readBuffer(length: number, _offset?: number): Buffer {
         const offset = _offset === undefined ? this.offset : _offset
         const buffer = this.buffer.slice(offset, offset + length)
@@ -315,6 +333,23 @@ export class WriteBuffer {
         const buffer = Buffer.alloc(8)
 
         buffer.writeBigUInt64LE(value)
+
+        this.writeBuffer(buffer)
+    }
+
+    
+    writeDoubleBE(value: number): void {
+        const buffer = Buffer.alloc(8)
+        
+        buffer.writeDoubleBE(value)
+        
+        this.writeBuffer(buffer)
+    }
+    
+    writeDoubleLE(value: number): void {
+        const buffer = Buffer.alloc(8)
+
+        buffer.writeDoubleLE(value)
 
         this.writeBuffer(buffer)
     }
