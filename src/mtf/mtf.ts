@@ -68,7 +68,7 @@ export class MTF {
     public groups: MTFGroups;
 
     /**
-     * Все задания в тестее
+     * Все задания в тесте
      */
     public tasks: MTFTasks;
 

@@ -13,8 +13,8 @@ export class TaskInputNumber extends AbstractTask {
         
         const countNum = buffer.readUInt8();
         for (let i = 0; i < countNum; i++) {
-            const from = buffer.readBigInt64BE();
-            const to = buffer.readBigInt64BE();
+            const from = buffer.readDoubleLE();
+            const to = buffer.readDoubleLE();
             const label = buffer.readDelphiString();
 
             this.numberAnswers.push({
@@ -33,8 +33,8 @@ export class TaskInputNumber extends AbstractTask {
 
         buffer.writeUInt8(this.numberAnswers.length);
         for (const num of this.numberAnswers) {
-            buffer.writeBigInt64BE(num.range[0]);
-            buffer.writeBigInt64BE(num.range[1]);
+            buffer.writeDoubleLE(num.range[0]);
+            buffer.writeDoubleLE(num.range[1]);
             buffer.writeDelphiString(num.label);
         }
 

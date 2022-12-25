@@ -23,16 +23,22 @@ export class MTFTasks extends Array<Task> {
                     break;
                 case TaskType.Matching:
                     task = new TaskMatching().load(buffer);
+                    break;
                 case TaskType.MCQ:
                     task = new TaskMCQ().load(buffer);
+                    break;
                 case TaskType.InputNumber:
                     task = new TaskInputNumber().load(buffer);
+                    break;
                 case TaskType.InputText:
                     task = new TaskInputText().load(buffer);
+                    break;
                 case TaskType.ImagePart:
                     task = new TaskImagePart().load(buffer);
+                    break;
                 case TaskType.LetterPermutation:
                     task = new TaskLetterPermutation().load(buffer);
+                    break;
                 default:
                     throw new Error('Unknown task type')
             }
@@ -51,10 +57,12 @@ export class MTFTasks extends Array<Task> {
 
         for (const task of this) {
             buffer.writeUInt8(task.type);
+            
             task.save(buffer);
+
+            //BYTES 4 + 1 возможно не используются
+            buffer.writeZeroBytes(5);
         }
 
-        //BYTES 4 + 1 возможно не используются
-        buffer.writeZeroBytes(5);
     }
 }

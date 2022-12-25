@@ -55,7 +55,7 @@ export type Task = (
 
 export type NumberAnswer = {
     label: string
-    range: [bigint, bigint]
+    range: [number, number]
 }
 
 export type Resource = {
