@@ -30,9 +30,12 @@ export class RTFParser {
         const fonts: RTFFonts = parsed.find((group) => {
             return group instanceof ControlWordGroup && group[0] instanceof ControlWordDefault && group[0].name === 'fonttbl';
         }).slice(1).reduce((accumulator: any, current: any) => {
-            //TO DO REWRITE BY GETTING WORD NAME
-            const f = current[0].value
-            const charset = current[2].value
+            const f = current.find((_: ControlWordDefault) => {
+                return _.name === 'f'
+            }).value;
+            const charset = current.find((_: ControlWordDefault) => {
+                return _.name === 'fcharset'
+            })?.value;
 
             accumulator[f] = charset;
 
@@ -157,6 +160,11 @@ export class RTFParser {
             this.currentControlWord = new ControlWordDefault();
             this.currentControlWord.canIgnore = ignore;
 
+            return;
+        }
+
+        if (symbol === ';') {
+            this.endControlWord()
             return;
         }
 
