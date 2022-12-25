@@ -163,11 +163,6 @@ export class RTFParser {
             return;
         }
 
-        if (symbol === ';') {
-            this.endControlWord()
-            return;
-        }
-
         if (symbol === '?' && this.currentControlWord?.name === 'u') {
             return this.endControlWord()
         }
@@ -203,6 +198,11 @@ export class RTFParser {
 
         if (symbol === '\'') {
             this.currentControlWord = new ControlWordHex();
+            return;
+        }
+
+        if (symbol === ';') {
+            this.endControlWord()
             return;
         }
 
