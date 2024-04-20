@@ -1,5 +1,9 @@
+import { createHash } from "crypto";
 import { ReadBuffer, WriteBuffer } from "../utils/buffer";
 import { Marks, Modes, QuestionFormulization, TaskOrder, VariantOrder } from "./types";
+
+const passwordTypes = ['edit', 'open', 'run', 'result'] as const;
+export type PasswordType = typeof passwordTypes[number];
 
 export class MTFSettings {
     /**
@@ -50,10 +54,20 @@ export class MTFSettings {
     public dateStarting: bigint = 0n;
     public dateEnding: bigint = 0n;
 
-    public passwordEdit: string = '';
-    public passwordOpen: string = '';
-    public passwordRun: string = '';
-    public passwordProtectionResult: string = '';
+    /**
+     * Объект хранящий хэши паролей.
+     * Установить пароль можно через setPassword(type, value)
+     * 
+     * Использование паролей:
+     * edit - При открытии в MyTestEditor
+     * open - Во время открытия теста в MyTestStudent
+     * run - Во время начала прохождения теста в MyTestStudent
+     * result - Просмотр результата теста (там вроде свой файл)
+     */
+    public password: Record<PasswordType, string> = {
+        edit: '', open: '',
+        run: '', result: ''
+    }
 
     public markLevel: number = 5;
     public marks: Marks = {
@@ -64,6 +78,14 @@ export class MTFSettings {
         5: { percent: 85, name: '' }
     };
     public mark100True: boolean = true;
+
+    public setPassword(type: PasswordType, value: string | null | undefined): void {
+        if (value) {
+            value = createHash('md5').update(value).digest('hex');
+        }
+
+        this.password[type] = value ?? '';
+    }
 
     public load(buffer: ReadBuffer) {
         this.taskOrder = buffer.readUInt8();
@@ -90,10 +112,10 @@ export class MTFSettings {
         this.limitErrorCount = buffer.readUInt32LE();
         this.dateStarting = buffer.readBigUInt64LE();
         this.dateEnding = buffer.readBigUInt64LE();
-        this.passwordEdit = buffer.readDelphiString();
-        this.passwordOpen = buffer.readDelphiString();
-        this.passwordRun = buffer.readDelphiString();
-        this.passwordProtectionResult = buffer.readDelphiString();
+
+        for (const type of passwordTypes) {
+            this.password[type] = buffer.readDelphiString();
+        }
 
         this.markLevel = buffer.readUInt32LE();
         this.marks = {};
@@ -134,10 +156,10 @@ export class MTFSettings {
         buffer.writeUInt32LE(this.limitErrorCount);
         buffer.writeBigUInt64LE(this.dateStarting);
         buffer.writeBigUInt64LE(this.dateEnding);
-        buffer.writeDelphiString(this.passwordEdit);
-        buffer.writeDelphiString(this.passwordOpen);
-        buffer.writeDelphiString(this.passwordRun);
-        buffer.writeDelphiString(this.passwordProtectionResult);
+
+        for (const type of passwordTypes) {
+            buffer.writeDelphiString(this.password[type]);
+        }
 
         buffer.writeUInt32LE(this.markLevel);
         for (const _mark in this.marks) {

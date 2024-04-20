@@ -3,7 +3,7 @@ import { userInfo } from "os";
 import { deflateSync, inflateSync } from "zlib";
 import { ReadBuffer, WriteBuffer } from "../utils/buffer";
 import { decrypt, encrypt } from "../utils/crypt";
-import { guid } from '../utils/guid'
+import { getRandomGUID } from '../utils/guid';
 import { MTFGroups } from "./groups";
 import { MTFResources } from "./resources";
 import { MTFSettings } from "./settings";
@@ -59,6 +59,9 @@ export class MTF {
 
     /**
      * Уникальный GUID теста. Меняется при каждом сохрании
+     * 
+     * Используется для предотвращения повтороного запуска в MyTestStudent
+     * при наличии settings.limitRunCount
      */
     public guid: string;
 
@@ -100,9 +103,9 @@ export class MTF {
 
         this.author = `${user} via NodeJS`;
         this.settings = new MTFSettings();
-        this.timeCreate = BigInt(Date.now())
-        this.timeSave = BigInt(Date.now())
-        this.guid = guid()
+        this.timeCreate = BigInt(Date.now());
+        this.timeSave = BigInt(Date.now());
+        this.guid = getRandomGUID();
 
         this.groups = new MTFGroups();
         this.tasks = new MTFTasks();
@@ -173,7 +176,7 @@ export class MTF {
     public saveToBuffer(update: boolean = true): Buffer {
         if (update) {
             this.timeSave = BigInt(Date.now());
-            this.guid = guid();
+            this.guid = getRandomGUID();
         }
 
         const writeBuffer = new WriteBuffer();

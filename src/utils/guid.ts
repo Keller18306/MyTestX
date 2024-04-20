@@ -1,5 +1,5 @@
 import { randomUUID } from "crypto";
 
-export function guid() {
+export function getRandomGUID() {
     return `{${randomUUID().toUpperCase()}}`
 }
