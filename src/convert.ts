@@ -1,12 +1,13 @@
-import { link, readFileSync, writeFileSync } from "fs";
-import MTF, { TaskInputNumber, TaskInputText, TaskMatching, TaskMultiChoise, TaskSingleChoise } from "./mtf";
+import { writeFileSync } from "fs";
+import MTF, {
+    TaskInputNumber, TaskInputText, TaskMatching, TaskMultiChoise, TaskSingleChoise
+} from "./mtf";
+import { TaskType } from "./mtf/types";
 import { RTFParser } from "./rtf/parser";
-import { textToRtf } from "./rtf";
-import { TaskOrder, TaskType } from "./mtf/types";
 
 //конвертировать MTF в TXT (не всё конвертирует)
 
-const mtf = MTF.loadFromFile('./Tests/New.mtf');
+const mtf = MTF.loadFromFile('./bootstrap.mtf');
 
 const lines: string[] = [];
 
@@ -27,13 +28,20 @@ for (const i in mtf.tasks) {
     }
 
     if ((task instanceof TaskSingleChoise || task instanceof TaskMultiChoise) && [TaskType.SingleChoice, TaskType.MultiChoice].includes(task.type)) {
+        let typeName: string;
+        if (task instanceof TaskMultiChoise) {
+            typeName = 'выбрать все правильные';
+        } else {
+            typeName = 'выбрать один правильный';
+        }
+
         const answer = task.answers.map((answer, i) => {
             return '> ' + String(i + 1) + '. ' + new RTFParser(answer).parseText().trim();
         }).filter((answer, i) => {
             return Boolean(task.correctAnswers[i])
         }).join('\n')
 
-        line.push('Ответы (выбрать всё):')
+        line.push(`Ответы (${typeName}):`)
         line.push(answer)
     } else if (task instanceof TaskInputText && TaskType.InputText === task.type) {
         line.push('Ответы (любая строка):')
@@ -48,19 +56,19 @@ for (const i in mtf.tasks) {
             line.push('> ' + (answer.label ? answer.label + ': ' : '') + (answer.range[0] === answer.range[1] ? answer.range[0] : `${answer.range[0]} - ${answer.range[1]}`))
         }
     } else if (task instanceof TaskMatching && task.type === TaskType.Matching) {
-        line.push('Ответы (соеднить):')
+        line.push('Ответы (соеднить):');
 
         for (let i = 0; i < Math.max(task.answers.length, task.correctAnswers.length); i++) {
             const answerIndex = task.correctAnswers[i]
             if (answerIndex === 0) continue;
 
-            const answer1 = new RTFParser(task.answers[answerIndex - 1]).parseText().trim()
-            const answer2 = new RTFParser(task.matchingAnswers[i]).parseText().trim()
+            const answer1 = new RTFParser(task.answers[i]).parseText().trim();
+            const answer2 = new RTFParser(task.matchingAnswers[answerIndex - 1]).parseText().trim();
 
-            line.push(`${answerIndex}. ${answer1} - ${i + 1}. ${answer2}`)
+            line.push(`${answerIndex}. ${answer1} - ${i + 1}. ${answer2}`);
         }
     } else {
-        console.log(task.type)
+        console.log('unknown type', task.type, task)
     }
 
     lines.push(line.join('\n'))
