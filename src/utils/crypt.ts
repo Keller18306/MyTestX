@@ -1,5 +1,3 @@
-import zlib from 'zlib';
-
 export function decrypt(buffer: Buffer): Buffer {
     const byteArray: number[] = [];
     let lastKey = 0x101;

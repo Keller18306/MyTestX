@@ -1,9 +1,7 @@
 import { Socket } from "net";
-import MTF, { TaskMultiChoise } from "../mtf";
-import { RTFParser, textToRtf } from "../rtf";
-import { writeFileSync } from "fs";
-import { TaskOrder, TaskType, VariantOrder } from "../mtf/types";
-import { TaskSingleChoise } from "../mtf";
+import { convertTasks } from "../converter/convertTasks";
+import MTF from "../mtf";
+import { TaskOrder, VariantOrder } from "../mtf/types";
 
 enum ClientInjectorState {
 
@@ -122,38 +120,29 @@ export class MTXInjector {
     }
 
     private fileReceived() {
-        let buffer = Buffer.concat(this.fileParts!)
+        let buffer = Buffer.concat(this.fileParts!);
 
-        const mtf = MTF.loadFromBuffer(buffer)
+        const mtf = MTF.loadFromBuffer(buffer);
 
         //Убрать пароль на редактирвоание
-        mtf.settings.passwordEdit = ''
+        mtf.settings.password.edit = '';
 
         //Убрать лимит на кол-во запусков
-        mtf.settings.limitRunCount = 0
+        mtf.settings.limitRunCount = 0;
 
-        mtf.settings.isCanSaveResult = true
+        mtf.settings.isCanSaveResult = true;
 
-        mtf.settings.taskOrder = TaskOrder.Default
-        mtf.settings.variantOrder = VariantOrder.Default
+        mtf.settings.taskOrder = TaskOrder.Default;
+        mtf.settings.variantOrder = VariantOrder.Default;
 
         for (const task of mtf.tasks) {
-            task.promptCost = 0
+            task.promptCost = 0;
+            task.shuffleAnswers = false;
 
-            if (task instanceof TaskSingleChoise || task instanceof TaskMultiChoise) {
-                let answer: string
-
-                task.prompt = textToRtf(task.answers.map((answer, i) => {
-                    return String(i + 1) + ' ' + new RTFParser(answer).parseText();
-                }).filter((answer, i) => {
-                    return Boolean(task.correctAnswers[i])
-                }).join('\n'))
-            }
-
-            task.shuffleAnswers = false
+            task.prompt = convertTasks([task]);
         }
 
-        buffer = mtf.saveToBuffer(false)
+        buffer = mtf.saveToBuffer(false);
     
         buffer = Buffer.concat([
             ...(!this.fileNameSent ? [
@@ -161,21 +150,21 @@ export class MTXInjector {
             ] : []),
             Buffer.from(String(buffer.length) + '\r\n', 'utf8'),
             buffer
-        ])
+        ]);
 
         const maxSize = Math.max(...this.fileParts!.map((_) => {
             return _.length;
-        }))
+        }));
 
         this.fileNameSent = false;
-        this.fileParts = undefined
-        this.serverState = undefined
+        this.fileParts = undefined;
+        this.serverState = undefined;
         
         // for (let offset = 0; offset < buffer.length; offset += maxSize) {
         //     const slice = buffer.subarray(offset, offset + maxSize)
 
-        console.log(`[Proxy -> Client]:`, buffer)
-        this.client.write(buffer)
+        console.log(`[Proxy -> Client]:`, buffer);
+        this.client.write(buffer);
         //}
         // for (let part = 0; part < parts; part++) {
         //     const subarray = buffer.subarray(5536 * part, 5536 * (part + 1))

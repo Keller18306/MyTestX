@@ -15,6 +15,8 @@ export class MTXServer extends Server {
     }
 
     public run() {
-        this.listen(config.bindPort, config.bindHost)
+        this.listen(config.bindPort, config.bindHost, () => {
+            console.log('Listening...', config.bindPort, config.bindHost);
+        })
     }
 }
