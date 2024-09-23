@@ -1,6 +1,6 @@
 import { Server, Socket } from 'net'
-import { MTXClient } from './client'
 import { config } from './config'
+import { MTXProxy } from './proxy'
 
 export class MTXServer extends Server {
     constructor() {
@@ -11,7 +11,7 @@ export class MTXServer extends Server {
 
     private onConnect(socket: Socket) {
         
-        new MTXClient(socket)
+        new MTXProxy(socket)
     }
 
     public run() {

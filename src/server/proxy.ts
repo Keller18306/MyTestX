@@ -1,10 +1,13 @@
 import { Socket } from "net";
 import { config } from "./config";
 import { MTXInjector } from "./injector";
+import { ProxiedBuffer } from "./buffer";
 
-export class MTXClient {
+export class MTXProxy {
     private client: Socket; //connection to my test student
+    private clientBuffer: ProxiedBuffer;
     private server: Socket; //connection to original server
+    private serverBuffer: ProxiedBuffer;
 
     private injector: MTXInjector;
 
@@ -19,7 +22,16 @@ export class MTXClient {
         this.server.on('data', this.onServerData.bind(this))
         this.server.on('close', this.onServerClose.bind(this))
 
-        this.injector = new MTXInjector(this.client, this.server)
+        this.clientBuffer = new ProxiedBuffer((data: Buffer) => { 
+            console.log(`[Proxy -> Server]:`, data)
+            this.server.write(data);
+        });
+        this.serverBuffer = new ProxiedBuffer((data: Buffer) => {
+            console.log(`[Proxy -> Client]:`, data)
+            this.client.write(data);
+        });
+
+        this.injector = new MTXInjector();
 
         this.onClientConnect()
     }
@@ -28,31 +40,23 @@ export class MTXClient {
         console.log('[Proxy -> Server]: Successfull connected')
     }
 
-    private onClientConnect() { 
+    private onClientConnect() {
         console.log(`[Client -> Proxy]: New connection from ${this.client.remoteAddress}:${this.client.remotePort}`)
 
         console.log(`[Proxy -> Server]: Trying connect to ${config.serverHost}:${config.serverPort}...`)
         this.server.connect(config.serverPort, config.serverHost)
     }
-    
-    private onServerData(data: Buffer) {
-        if (this.injector.onServerData(data)) {
-            console.log(`[Server -> Client]:`, data)
 
-            this.client.write(data)
-        } else {
-            console.log(`[Server -> Proxy]:`, data)
-        }
+    private onServerData(data: Buffer) {
+        console.log(`[Server -> Proxy]:`, data);
+        this.serverBuffer.append(data);
+        this.injector.onServerData(this.serverBuffer);
     }
 
     private onClientData(data: Buffer) {
-        if (this.injector.onClientData(data)) {
-            console.log(`[Client -> Server]:`, data)
-
-            this.server.write(data)
-        } else {
-            console.log(`[Client -> Proxy]:`, data)
-        }
+        console.log(`[Client -> Proxy]:`, data);
+        this.clientBuffer.append(data);
+        this.injector.onClientData(this.clientBuffer);
     }
 
     private onServerClose() {
